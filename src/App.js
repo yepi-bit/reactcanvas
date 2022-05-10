@@ -1,25 +1,33 @@
-import logo from './logo.svg';
-import './App.css';
+import {useLayoutEffect} from "react";
+import {CanvasContext} from "./Context";
+import Cmps from "./layouts/Cmps";
+import Content from "./layouts/Content";
+import Edit from "./layouts/Edit";
+import {useForceUpdate} from "./layouts/hooks";
+import {useCanvas} from "./store/globalCanvas";
+import styles from "./App.less";
 
-function App() {
+export default function App() {
+  const forceUpdate = useForceUpdate();
+
+  // 所有组件
+  const globalCanvas = useCanvas();
+
+  useLayoutEffect(() => {
+    const unsubscribe = globalCanvas.subscribe(() => {
+      forceUpdate();
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, [globalCanvas, forceUpdate]);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div id="app" className={styles.main}>
+      <CanvasContext.Provider value={globalCanvas}>
+        <Cmps />
+        <Content />
+        <Edit />
+      </CanvasContext.Provider>
     </div>
   );
 }
-
-export default App;
